@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <style>
         :root {
-            /* 只改这一个数字：1 = 原大小，0.85 = 缩到 85% */
-            --stage-scale: 0.85;
+            /* 画面整体缩放：1 = 原大小 */
+            --stage-scale: 1;
         }
 
         html {
@@ -100,7 +100,7 @@
             transform-origin: center center;
         }
 
-        /* 头像层：独立于 stage，始终浮在最上面，跟随缩放 */
+        /* 头像层：独立于 stage，始终浮在最上面 */
         #logo-wrap {
             position: fixed;
             top: 0;
@@ -110,11 +110,11 @@
             text-align: center;
             transform: scale(var(--stage-scale));
             transform-origin: top center;
-            pointer-events: none; /* 让空白区域不挡点击 */
+            pointer-events: none;
         }
 
             #logo-wrap img {
-                pointer-events: auto; /* 只有图片本身可点击 */
+                pointer-events: auto;
             }
 
         /* 遮罩层：在头像下面，盖住 canvas 和文字 */
@@ -140,15 +140,12 @@
 </head>
 
 <body>
-    <!-- 头像：在遮罩之上，遮罩期间可见、可点击 -->
     <div id="logo-wrap">
         <img src="tx.jpg" id="logo" alt="头像">
     </div>
 
-    <!-- 遮罩：盖住 canvas 和文字，但不盖头像 -->
-    <div id="cover"> </div>
+    <div id="cover">点击头像，开启贺卡</div>
 
-    <!-- 舞台：canvas 和文字，点击后才启动 -->
     <div id="stage">
         <canvas class="canvas" width="1820" height="905"></canvas>
         <p class="text" style="color: #ed3073;">
@@ -161,7 +158,7 @@
     <script language="javascript">
         function show_date_time() {
             window.setTimeout("show_date_time()", 1000);
-            BirthDay = new Date("11/18/2002 00:00:00");//这个日期是可以修改的
+            BirthDay = new Date("11/18/2002 00:00:00");
             today = new Date();
             timeold = (today.getTime() - BirthDay.getTime());
             sectimeold = timeold / 1000
@@ -183,17 +180,21 @@
             init: function () {
                 S.Drawing.init('.canvas');
                 document.body.classList.add('body--ready');
-                //想说的话
-                S.UI.simulate("#circle 12 |#countdown 3|刘云晴|生日快乐|#rectangle 15x15|#time");
+                S.UI.simulate("刘云晴|生日快乐哟|#countdown 3|#rectangle 15x15|#circle 12 |#time");
                 S.Drawing.loop(function () {
                     S.Shape.render();
                 });
             }
         };
+
         S.Drawing = (function () {
             var canvas,
                 context,
                 renderFn,
+                cssW = 0,
+                cssH = 0,
+                /* ★ 渲染分辨率倍数：内部像素 = CSS 尺寸 × 4 */
+                RENDER_SCALE = 4,
                 requestFrame = window.requestAnimationFrame ||
                     window.webkitRequestAnimationFrame ||
                     window.mozRequestAnimationFrame ||
@@ -218,14 +219,22 @@
                     requestFrame.call(window, this.loop.bind(this));
                 },
                 adjustCanvas: function () {
-                    canvas.width = window.innerWidth - 100;
-                    canvas.height = window.innerHeight - 30;
+                    cssW = window.innerWidth - 100;
+                    cssH = window.innerHeight - 30;
+                    // 内部像素放大 RENDER_SCALE 倍
+                    canvas.width = cssW * RENDER_SCALE;
+                    canvas.height = cssH * RENDER_SCALE;
+                    // CSS 显示尺寸保持原来的大小
+                    canvas.style.width = cssW + 'px';
+                    canvas.style.height = cssH + 'px';
+                    // 把绘制坐标系映射回 CSS 像素，粒子的坐标逻辑完全不用改
+                    context.setTransform(RENDER_SCALE, 0, 0, RENDER_SCALE, 0, 0);
                 },
                 clearFrame: function () {
-                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    context.clearRect(0, 0, cssW, cssH);
                 },
                 getArea: function () {
-                    return { w: canvas.width, h: canvas.height };
+                    return { w: cssW, h: cssH };
                 },
                 drawCircle: function (p, c) {
                     context.fillStyle = c.render();
@@ -236,6 +245,7 @@
                 }
             };
         }());
+
         S.UI = (function () {
             var interval,
                 currentAction,
@@ -330,6 +340,7 @@
                 }
             };
         }());
+
         S.Point = function (args) {
             this.x = args.x;
             this.y = args.y;
@@ -337,6 +348,7 @@
             this.a = args.a;
             this.h = args.h;
         };
+
         S.Color = function (r, g, b, a) {
             this.r = r;
             this.g = g;
@@ -348,6 +360,7 @@
                 return 'rgba(' + this.r + ',' + +this.g + ',' + this.b + ',' + this.a + ')';
             }
         };
+
         S.Dot = function (x, y) {
             this.p = new S.Point({
                 x: x,
@@ -441,6 +454,7 @@
                 this._draw();
             }
         };
+
         S.ShapeBuilder = (function () {
             var gap = 13,
                 shapeCanvas = document.createElement('canvas'),
@@ -545,6 +559,7 @@
                 }
             };
         }());
+
         S.Shape = (function () {
             var dots = [],
                 width = 0,
@@ -636,10 +651,8 @@
         }());
     </script>
 
-    <!-- 音乐 -->
     <audio id="bgm" src="bgm.mp3" loop preload="auto"></audio>
 
-    <!-- 点击头像才启动 -->
     <script>
         var started = false;
         document.getElementById('logo').addEventListener('click', function () {

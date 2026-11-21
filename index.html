@@ -7,7 +7,7 @@
     <style>
         :root {
             /* 画面整体缩放：1 = 原大小 */
-            --stage-scale: 1;
+            --stage-scale: 2;
         }
 
         html {
@@ -144,7 +144,7 @@
         <img src="tx.jpg" id="logo" alt="头像">
     </div>
 
-    <div id="cover">点击头像，开启贺卡</div>
+    <div id="cover"> </div>
 
     <div id="stage">
         <canvas class="canvas" width="1820" height="905"></canvas>
@@ -181,7 +181,7 @@
                 S.Drawing.init('.canvas');
                 document.body.classList.add('body--ready');
                 //想说的话
-                S.UI.simulate("刘云晴|生日快乐哟|#countdown 3|#rectangle 15x15|#circle 12 |#time");
+                S.UI.simulate("#circle 12 |#countdown 3|刘云晴|生日快乐|#rectangle 15x15|#time");
                 S.Drawing.loop(function () {
                     S.Shape.render();
                 });

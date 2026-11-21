@@ -158,7 +158,7 @@
     <script language="javascript">
         function show_date_time() {
             window.setTimeout("show_date_time()", 1000);
-            BirthDay = new Date("11/18/2002 00:00:00");
+            BirthDay = new Date("11/18/2002 00:00:00");//这个日期是可以修改的
             today = new Date();
             timeold = (today.getTime() - BirthDay.getTime());
             sectimeold = timeold / 1000
@@ -180,6 +180,7 @@
             init: function () {
                 S.Drawing.init('.canvas');
                 document.body.classList.add('body--ready');
+                //想说的话
                 S.UI.simulate("刘云晴|生日快乐哟|#countdown 3|#rectangle 15x15|#circle 12 |#time");
                 S.Drawing.loop(function () {
                     S.Shape.render();
@@ -239,7 +240,8 @@
                 drawCircle: function (p, c) {
                     context.fillStyle = c.render();
                     context.beginPath();
-                    context.arc(p.x, p.y, p.z, 0, 2 * Math.PI, true);
+                    /* ★ 点半径系数 0.45：点更细，更容易连成线。想更细可降到 0.35，想更粗可提到 0.6 */
+                    context.arc(p.x, p.y, p.z * 0.45, 0, 2 * Math.PI, true);
                     context.closePath();
                     context.fill();
                 }
@@ -456,7 +458,8 @@
         };
 
         S.ShapeBuilder = (function () {
-            var gap = 13,
+            /* ★ 采样间距 7：点更密，轮廓更连续。想更密可降到 6，卡就回 8 */
+            var gap = 7,
                 shapeCanvas = document.createElement('canvas'),
                 shapeContext = shapeCanvas.getContext('2d'),
                 fontSize = 500,
@@ -651,8 +654,10 @@
         }());
     </script>
 
+    <!-- 音乐 -->
     <audio id="bgm" src="bgm.mp3" loop preload="auto"></audio>
 
+    <!-- 点击头像才启动 -->
     <script>
         var started = false;
         document.getElementById('logo').addEventListener('click', function () {
